@@ -29,7 +29,7 @@ model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accura
 startTime = time.time()
 
 # 学習
-epochs = 500
+epochs = 200
 batch_size = 128
 model.fit(X_train, Y__train_categorical, batch_size=batch_size, epochs=epochs)
 
