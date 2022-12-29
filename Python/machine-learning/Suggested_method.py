@@ -23,19 +23,21 @@ main_model.add(Dense(2, activation='softmax'))
 main_model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
 Loop_count = 1
+Loop_final = 10
 startTime = time.time()
 
 # ループ
-for Loop in range(10):
-  print("ループ回数 : ", Loop_count)
+for Loop in range(Loop_final):
+  print("ループ回数: ", Loop_count)
 
-  Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
-  #print(Y_train_categorical)
+  if Loop_count == 1:
+    Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
+    #print(Y_train_categorical)
 
-  # 学習
-  main_epochs = 200
-  main_batch_size = 32
-  main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
+    # 学習
+    main_epochs = 300
+    main_batch_size = 64
+    main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
 
   # 予測
   Y_predict = main_model.predict(X_unlabel)
@@ -67,7 +69,7 @@ for Loop in range(10):
   #ax.set_xlim(-2, 2)
   #ax.set_ylim(-2, 2)
   #plt.title("predict result")
-  plt.show()
+  #plt.show()
 
   # 野生データ(予測したデータ)の学習
   num = 200
@@ -103,19 +105,19 @@ for Loop in range(10):
   np.random.shuffle(shuffle_num5)
 
   X_model1 = X_unlabel[shuffle_num1[0:num], :]
-  Y_model1 = Y_predict_label[shuffle_num1[0:num], :]
+  Y_model1 = Y_predict_label[shuffle_num1[0:num]]
 
   X_model2 = X_unlabel[shuffle_num2[0:num], :]
-  Y_model2 = Y_predict_label[shuffle_num2[0:num], :]
+  Y_model2 = Y_predict_label[shuffle_num2[0:num]]
 
   X_model3 = X_unlabel[shuffle_num3[0:num], :]
-  Y_model3 = Y_predict_label[shuffle_num3[0:num], :]
+  Y_model3 = Y_predict_label[shuffle_num3[0:num]]
 
   X_model4 = X_unlabel[shuffle_num4[0:num], :]
-  Y_model4 = Y_predict_label[shuffle_num4[0:num], :]
+  Y_model4 = Y_predict_label[shuffle_num4[0:num]]
 
   X_model5 = X_unlabel[shuffle_num5[0:num], :]
-  Y_model5 = Y_predict_label[shuffle_num5[0:num], :]
+  Y_model5 = Y_predict_label[shuffle_num5[0:num]]
 
   # 野生データ学習用のモデル構築
   # モデル1
@@ -165,8 +167,8 @@ for Loop in range(10):
   Y_model5_categorical = keras.utils.to_categorical(Y_model5-1, 2)
 
   # 学習
-  epochs = 250
-  batch_size = 64
+  epochs = 200
+  batch_size = 32
 
   model1.fit(X_model1, Y_model1_categorical, batch_size=batch_size, epochs=epochs)
   model2.fit(X_model2, Y_model2_categorical, batch_size=batch_size, epochs=epochs)
@@ -207,40 +209,58 @@ for Loop in range(10):
   print("Top_accuracy_model:", top_accuracy)
 
   # データの追加・削除
-  if top_accuracy==1:
+  if top_accuracy == 1:
     X_train = np.concatenate((X_train, X_unlabel[shuffle_num1[0:num], :]), axis=0)
-    Y_train = np.append(Y_train, Y_predict_label[shuffle_num1[0:num], :])
+    Y_train = np.append(Y_train, Y_predict_label[shuffle_num1[0:num]])
 
     X_unlabel = np.delete(X_unlabel, shuffle_num1[0:num], axis=0)
     Y_predict_label = np.delete(Y_predict_label, shuffle_num1[0:num], axis=0)
 
-  elif top_accuracy==2:
+  elif top_accuracy == 2:
     X_train = np.concatenate((X_train, X_unlabel[shuffle_num2[0:num], :]), axis=0)
-    Y_train = np.append(Y_train, Y_predict_label[shuffle_num2[0:num], :])
+    Y_train = np.append(Y_train, Y_predict_label[shuffle_num2[0:num]])
 
     X_unlabel = np.delete(X_unlabel, shuffle_num2[0:num], axis=0)
     Y_predict_label = np.delete(Y_predict_label, shuffle_num2[0:num], axis=0)
 
-  elif top_accuracy==3:
+  elif top_accuracy == 3:
     X_train = np.concatenate((X_train, X_unlabel[shuffle_num3[0:num], :]), axis=0)
-    Y_train = np.append(Y_train, Y_predict_label[shuffle_num3[0:num], :])
+    Y_train = np.append(Y_train, Y_predict_label[shuffle_num3[0:num]])
 
     X_unlabel = np.delete(X_unlabel, shuffle_num3[0:num], axis=0)
     Y_predict_label = np.delete(Y_predict_label, shuffle_num3[0:num], axis=0)
 
-  elif top_accuracy==4:
+  elif top_accuracy == 4:
     X_train = np.concatenate((X_train, X_unlabel[shuffle_num4[0:num], :]), axis=0)
-    Y_train = np.append(Y_train, Y_predict_label[shuffle_num4[0:num], :])
+    Y_train = np.append(Y_train, Y_predict_label[shuffle_num4[0:num]])
 
     X_unlabel = np.delete(X_unlabel, shuffle_num4[0:num], axis=0)
     Y_predict_label = np.delete(Y_predict_label, shuffle_num4[0:num], axis=0)
 
-  elif top_accuracy==5:
+  elif top_accuracy == 5:
     X_train = np.concatenate((X_train, X_unlabel[shuffle_num5[0:num], :]), axis=0)
-    Y_train = np.append(Y_train, Y_predict_label[shuffle_num5[0:num], :])
+    Y_train = np.append(Y_train, Y_predict_label[shuffle_num5[0:num]])
 
     X_unlabel = np.delete(X_unlabel, shuffle_num5[0:num], axis=0)
     Y_predict_label = np.delete(Y_predict_label, shuffle_num5[0:num], axis=0)
+
+  # データ追加後の学習
+  Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
+  print(Y_train_categorical)
+
+  main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
+
+  Y_test_categorical = keras.utils.to_categorical(Y_test-1, 2)
+  classifier = main_model.evaluate(X_test, Y_test_categorical, verbose=0)
+
+  if Loop_count < Loop_final:
+    # ループ毎のmain_modelの評価
+    print("%dループ目の精度"%Loop_count)
+    print('main_model_Cross entropy:{0:.3f}, main_model_Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
+
+  elif Loop_count == Loop_final:
+    print("最終精度")
+    print('main_model_Cross entropy:{0:.3f}, main_model_Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
   Loop_count += 1
 
@@ -258,17 +278,6 @@ ax.set_xlim(-2, 2)
 ax.set_ylim(-2, 2)
 plt.title("X_train Data")
 plt.show()
-
-# 最終学習
-Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
-print(Y_train_categorical)
-
-main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
-
-# main_modelの評価
-Y_test_categorical = keras.utils.to_categorical(Y_test-1, 2)
-classifier = main_model.evaluate(X_test, Y_test_categorical, verbose=0)
-print('main_model_Cross entropy:{0:.3f}, main_model_Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
 calculation_time = time.time() - startTime
 print("Calculation time:{0:.3f}sec".format(calculation_time))
