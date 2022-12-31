@@ -57,7 +57,7 @@ plt.show()
 Num = np.arange(X.shape[0])
 #print(Num.shape[0])
 
-rand = np.random.choice(Num, size=100, replace=False)
+rand = np.random.choice(Num, size=300, replace=False)
 #print("rand:", rand)
 
 X_train = np.zeros([rand.shape[0], 2])

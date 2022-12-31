@@ -1,4 +1,4 @@
-# ---------- 通常の半教師あり学習 ---------- #
+# ---------- 通常の半教師あり学習(アヤメデータ) ---------- #
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,15 +16,15 @@ Y_test = np.loadtxt("Y_test.csv", delimiter=",", dtype="float")
 
 # モデルの構築
 model = Sequential()
-model.add(InputLayer(input_shape=(2,)))
+model.add(InputLayer(input_shape=(4,)))
 model.add(Dense(500, activation='relu'))
 model.add(Dense(250, activation='relu'))
 model.add(Dense(100, activation='relu'))
-model.add(Dense(2, activation='softmax'))
+model.add(Dense(4, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
 Loop_count = 1
-Loop_final = 100
+Loop_final = 10
 startTime = time.time()
 
 # ループ
@@ -32,8 +32,8 @@ for Loop in range(Loop_final):
   print("ループ回数:", Loop_count)
 
   if Loop_count == 1:
-    Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
-    print(Y_train_categorical)
+    Y_train_categorical = keras.utils.to_categorical(Y_train-1, 4)
+    #print(Y_train_categorical)
 
     epochs = 200
     batch_size = 128
@@ -49,6 +49,8 @@ for Loop in range(Loop_final):
       Y_predict_label[i] = 0
     elif np.argmax(Y_predict[i]) == 1:
       Y_predict_label[i] = 1
+    elif np.argmax(Y_predict[i]) == 2:
+        Y_predict_label[i] = 2
 
   # 予測データの描画
   #predict_data_fig = plt.figure(figsize=(6, 6))
@@ -65,9 +67,9 @@ for Loop in range(Loop_final):
   #plt.title("predict result")
   #plt.show()
 
-  # 信頼度上位20点を抽出
-  X_add = np.zeros([10, 2])
-  Y_add = np.zeros([10, 1])
+  # 信頼度上位5点を抽出
+  X_add = np.zeros([5, 4])
+  Y_add = np.zeros([5, 1])
 
   for i in range(X_add.shape[0]):
     max_data = 0
@@ -89,41 +91,26 @@ for Loop in range(Loop_final):
   Y_train = np.append(Y_train, Y_add)
 
   # データ追加後の学習
-  Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
+  Y_train_categorical = keras.utils.to_categorical(Y_train-1, 4)
   #print(Y_train_categorical)
 
   model.fit(X_train, Y_train_categorical, batch_size=batch_size, epochs=epochs)
 
   if Loop_count < Loop_final:
     # ループ毎の評価
-    Y_test_categorical = keras.utils.to_categorical(Y_test-1, 2)
+    Y_test_categorical = keras.utils.to_categorical(Y_test-1, 4)
     classifier = model.evaluate(X_test, Y_test_categorical, verbose=0)
     print("%dループ目の精度" %Loop_count)
     print('Cross entropy:{0:.3f}, Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
   elif Loop_count == Loop_final:
     # 最終評価
-    Y_test_categorical = keras.utils.to_categorical(Y_test-1, 2)
+    Y_test_categorical = keras.utils.to_categorical(Y_test-1, 4)
     classifier = model.evaluate(X_test, Y_test_categorical, verbose=0)
     print("最終精度")
     print('Cross entropy:{0:.3f}, Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
   Loop_count += 1
-
-# 追加されたデータの描画
-fig = plt.figure(figsize=(6, 6))
-ax = fig.add_subplot(1, 1, 1)
-for i in range(X_train.shape[0]):
-  if Y_train[i] == 0:
-    ax.scatter(X_train[i, 0], X_train[i, 1], c='red', s=4)
-  elif Y_train[i] == 1:
-    ax.scatter(X_train[i, 0], X_train[i, 1], c='blue', s=4)
-
-margin = 1.1
-ax.set_xlim(-2, 2)
-ax.set_ylim(-2, 2)
-plt.title("X_train Data")
-plt.show()
 
 
 calculation_time = time.time() - startTime

@@ -23,14 +23,15 @@ model.add(InputLayer(input_shape=(2,)))
 model.add(Dense(500, activation='relu'))
 model.add(Dense(250, activation='relu'))
 model.add(Dense(100, activation='relu'))
-model.add(Dense(2, activation='softmax'))
+model.add(Dense(50, activation='relu'))
+model.add(Dense(2, activation='sigmoid'))
 model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
 startTime = time.time()
 
 # 学習
 epochs = 200
-batch_size = 128
+batch_size = 256
 model.fit(X_train, Y__train_categorical, batch_size=batch_size, epochs=epochs)
 
 # モデルの評価

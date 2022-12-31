@@ -19,6 +19,7 @@ main_model.add(InputLayer(input_shape=(2,)))
 main_model.add(Dense(500, activation='relu'))
 main_model.add(Dense(250, activation='relu'))
 main_model.add(Dense(100, activation='relu'))
+main_model.add(Dense(50, activation='relu'))
 main_model.add(Dense(2, activation='softmax'))
 main_model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
@@ -35,7 +36,7 @@ for Loop in range(Loop_final):
 
   # 学習
   main_epochs = 300
-  main_batch_size = 64
+  main_batch_size = 256
   main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
 
   # 予測
@@ -129,6 +130,7 @@ for Loop in range(Loop_final):
   model1.add(InputLayer(input_shape=(2,)))
   model1.add(Dense(200, activation='relu'))
   model1.add(Dense(100, activation='relu'))
+  model1.add(Dense(50, activation='relu'))
   model1.add(Dense(2, activation='softmax'))
   model1.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
@@ -137,6 +139,7 @@ for Loop in range(Loop_final):
   model2.add(InputLayer(input_shape=(2,)))
   model2.add(Dense(200, activation='relu'))
   model2.add(Dense(100, activation='relu'))
+  model2.add(Dense(50, activation='relu'))
   model2.add(Dense(2, activation='softmax'))
   model2.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
@@ -145,6 +148,7 @@ for Loop in range(Loop_final):
   model3.add(InputLayer(input_shape=(2,)))
   model3.add(Dense(200, activation='relu'))
   model3.add(Dense(100, activation='relu'))
+  model3.add(Dense(50, activation='relu'))
   model3.add(Dense(2, activation='softmax'))
   model3.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
@@ -153,6 +157,7 @@ for Loop in range(Loop_final):
   model4.add(InputLayer(input_shape=(2,)))
   model4.add(Dense(200, activation='relu'))
   model4.add(Dense(100, activation='relu'))
+  model4.add(Dense(50, activation='relu'))
   model4.add(Dense(2, activation='softmax'))
   model4.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
@@ -161,6 +166,7 @@ for Loop in range(Loop_final):
   model5.add(InputLayer(input_shape=(2,)))
   model5.add(Dense(200, activation='relu'))
   model5.add(Dense(100, activation='relu'))
+  model5.add(Dense(50, activation='relu'))
   model5.add(Dense(2, activation='softmax'))
   model5.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
@@ -172,7 +178,7 @@ for Loop in range(Loop_final):
 
   # 学習
   epochs = 200
-  batch_size = 32
+  batch_size = 64
 
   model1.fit(X_model1, Y_model1_categorical, batch_size=batch_size, epochs=epochs)
   model2.fit(X_model2, Y_model2_categorical, batch_size=batch_size, epochs=epochs)
