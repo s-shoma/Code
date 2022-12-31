@@ -24,7 +24,7 @@ main_model.add(Dense(2, activation='softmax'))
 main_model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
 Loop_count = 1
-Loop_final = 10
+Loop_final = 15
 startTime = time.time()
 
 # ループ
@@ -73,7 +73,7 @@ for Loop in range(Loop_final):
   #plt.show()
 
   # 野生データ(予測したデータ)の学習
-  num = 200
+  num = 100
 
   X_model1 = np.zeros([num, 2])
   Y_model1 = np.zeros([num, 1])
