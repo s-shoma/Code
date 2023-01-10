@@ -15,7 +15,7 @@ X_test = np.loadtxt("X_test.csv", delimiter=",", dtype="float")
 Y_test = np.loadtxt("Y_test.csv", delimiter=",", dtype="float")
 
 Loop_count = 1
-Loop_final = 100
+Loop_final = 10
 startTime = time.time()
 
 # ループ
@@ -187,6 +187,21 @@ for Loop in range(Loop_final):
     print("Accuracy:", main_model_accuracy)
 
   Loop_count += 1
+
+# 追加されたデータの描画
+#fig = plt.figure(figsize=(6, 6))
+#ax = fig.add_subplot(1, 1, 1)
+#for i in range(X_train.shape[0]):
+  #if Y_train[i] == 0:
+    #ax.scatter(X_train[i, 0], X_train[i, 1], c='red', s=4)
+  #elif Y_train[i] == 1:
+    #ax.scatter(X_train[i, 0], X_train[i, 1], c='blue', s=4)
+
+#margin = 1.1
+#ax.set_xlim(-2, 2)
+#ax.set_ylim(-2, 2)
+#plt.title("X_train Data")
+#plt.show()
 
 calculation_time = time.time() - startTime
 print("Calculation time:{0:.3f}sec".format(calculation_time))

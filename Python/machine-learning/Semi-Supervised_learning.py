@@ -6,6 +6,7 @@ import time
 from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense, InputLayer
+import winsound
 
 # ファイルの読み込み
 X_train = np.loadtxt("X_train.csv", delimiter=",", dtype="float")
@@ -15,17 +16,17 @@ X_test = np.loadtxt("X_test.csv", delimiter=",", dtype="float")
 Y_test = np.loadtxt("Y_test.csv", delimiter=",", dtype="float")
 
 # モデルの構築
-model = Sequential()
-model.add(InputLayer(input_shape=(2,)))
-model.add(Dense(500, activation='relu'))
-model.add(Dense(250, activation='relu'))
-model.add(Dense(100, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(2, activation='softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+main_model = Sequential()
+main_model.add(InputLayer(input_shape=(2,)))
+main_model.add(Dense(500, activation='relu'))
+main_model.add(Dense(250, activation='relu'))
+main_model.add(Dense(100, activation='relu'))
+main_model.add(Dense(50, activation='relu'))
+main_model.add(Dense(2, activation='softmax'))
+main_model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
 Loop_count = 1
-Loop_final = 30
+Loop_final = 120
 startTime = time.time()
 
 # ループ
@@ -33,18 +34,22 @@ for Loop in range(Loop_final):
   print("ループ回数:", Loop_count)
 
   if Loop_count == 1:
-    Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
+    Y_train_categorical = keras.utils.to_categorical(Y_train, 2)
     #print(Y_train_categorical)
 
-    epochs = 300
-    batch_size = 256
-    model.fit(X_train, Y_train_categorical, batch_size=batch_size, epochs=epochs) #学習
+    # 学習
+    main_epochs = 300
+    main_batch_size = 128
+    main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs) #学習
 
   # 仮ラベルの予測
-  Y_predict = model.predict(X_unlabel)
+  Y_predict = main_model.predict(X_unlabel)
+  #print(Y_predict)
 
-  # ラベル付け
+  # 仮ラベル付け
   Y_predict_label = np.zeros([Y_predict.shape[0], 1])
+  #print(Y_predict_label)
+
   for i in range(Y_predict.shape[0]):
     if np.argmax(Y_predict[i]) == 0:
       Y_predict_label[i] = 0
@@ -67,8 +72,8 @@ for Loop in range(Loop_final):
   #plt.show()
 
   # 信頼度上位20点を抽出
-  X_add = np.zeros([50, 2])
-  Y_add = np.zeros([50, 1])
+  X_add = np.zeros([20, 2])
+  Y_add = np.zeros([20, 1])
 
   for i in range(X_add.shape[0]):
     max_data = 0
@@ -90,22 +95,22 @@ for Loop in range(Loop_final):
   Y_train = np.append(Y_train, Y_add)
 
   # データ追加後の学習
-  Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
+  Y_train_categorical = keras.utils.to_categorical(Y_train, 2)
   #print(Y_train_categorical)
 
-  model.fit(X_train, Y_train_categorical, batch_size=batch_size, epochs=epochs)
+  main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
 
   if Loop_count < Loop_final:
     # ループ毎の評価
-    Y_test_categorical = keras.utils.to_categorical(Y_test-1, 2)
-    classifier = model.evaluate(X_test, Y_test_categorical, verbose=0)
+    Y_test_categorical = keras.utils.to_categorical(Y_test, 2)
+    classifier = main_model.evaluate(X_test, Y_test_categorical, verbose=0)
     print("%dループ目の精度" %Loop_count)
     print('Cross entropy:{0:.3f}, Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
   elif Loop_count == Loop_final:
     # 最終評価
-    Y_test_categorical = keras.utils.to_categorical(Y_test-1, 2)
-    classifier = model.evaluate(X_test, Y_test_categorical, verbose=0)
+    Y_test_categorical = keras.utils.to_categorical(Y_test, 2)
+    classifier = main_model.evaluate(X_test, Y_test_categorical, verbose=0)
     print("最終精度")
     print('Cross entropy:{0:.3f}, Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
@@ -132,3 +137,5 @@ print("Calculation time:{0:.3f}sec".format(calculation_time))
 
 print("X_unlabelの要素数:", X_unlabel.shape[0])
 print("X_trainの要素数:", X_train.shape[0])
+
+winsound.Beep(2000, 500)

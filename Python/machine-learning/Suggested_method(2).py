@@ -1,4 +1,5 @@
-# ---------- 提案手法(信頼度による抽出あり) ---------- #
+# ---------- 提案手法(信頼度) ---------- #
+
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -24,20 +25,21 @@ main_model.add(Dense(2, activation='softmax'))
 main_model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
 Loop_count = 1
-Loop_final = 150
+Loop_final = 120
 startTime = time.time()
 
 # ループ
 for Loop in range(Loop_final):
   print("ループ回数: ", Loop_count)
 
-  Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
-  #print(Y_train_categorical)
+  if Loop_count == 1:
+    Y_train_categorical = keras.utils.to_categorical(Y_train, 2)
+    #print(Y_train_categorical)
 
-  # 学習
-  main_epochs = 300
-  main_batch_size = 256
-  main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
+    # 学習
+    main_epochs = 300
+    main_batch_size = 128
+    main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
 
   # 予測
   Y_predict = main_model.predict(X_unlabel)
@@ -106,23 +108,23 @@ for Loop in range(Loop_final):
 
   X_model1 = X_unlabel[shuffle_num1[0:num], :]
   Y_model1 = Y_predict_label[shuffle_num1[0:num]]
-  Y_model1_reliability = Y_predict[shuffle_num1[0:num], :]    #信頼度
+  Y_model1_predict = Y_predict[shuffle_num1[0:num]]
 
   X_model2 = X_unlabel[shuffle_num2[0:num], :]
   Y_model2 = Y_predict_label[shuffle_num2[0:num]]
-  Y_model2_reliability = Y_predict[shuffle_num2[0:num], :]    #信頼度
+  Y_model2_predict = Y_predict[shuffle_num2[0:num]]
 
   X_model3 = X_unlabel[shuffle_num3[0:num], :]
   Y_model3 = Y_predict_label[shuffle_num3[0:num]]
-  Y_model3_reliability = Y_predict[shuffle_num3[0:num], :]    #信頼度
+  Y_model3_predict = Y_predict[shuffle_num3[0:num]]
 
   X_model4 = X_unlabel[shuffle_num4[0:num], :]
   Y_model4 = Y_predict_label[shuffle_num4[0:num]]
-  Y_model4_reliability = Y_predict[shuffle_num4[0:num], :]    #信頼度
+  Y_model4_predict = Y_predict[shuffle_num4[0:num]]
 
   X_model5 = X_unlabel[shuffle_num5[0:num], :]
   Y_model5 = Y_predict_label[shuffle_num5[0:num]]
-  Y_model5_reliability = Y_predict[shuffle_num5[0:num], :]    #信頼度
+  Y_model5_predict = Y_predict[shuffle_num5[0:num]]
 
   # 野生データ学習用のモデル構築
   # モデル1
@@ -170,14 +172,14 @@ for Loop in range(Loop_final):
   model5.add(Dense(2, activation='softmax'))
   model5.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
-  Y_model1_categorical = keras.utils.to_categorical(Y_model1-1, 2)
-  Y_model2_categorical = keras.utils.to_categorical(Y_model2-1, 2)
-  Y_model3_categorical = keras.utils.to_categorical(Y_model3-1, 2)
-  Y_model4_categorical = keras.utils.to_categorical(Y_model4-1, 2)
-  Y_model5_categorical = keras.utils.to_categorical(Y_model5-1, 2)
+  Y_model1_categorical = keras.utils.to_categorical(Y_model1, 2)
+  Y_model2_categorical = keras.utils.to_categorical(Y_model2, 2)
+  Y_model3_categorical = keras.utils.to_categorical(Y_model3, 2)
+  Y_model4_categorical = keras.utils.to_categorical(Y_model4, 2)
+  Y_model5_categorical = keras.utils.to_categorical(Y_model5, 2)
 
   # 学習
-  epochs = 200
+  epochs = 150
   batch_size = 64
 
   model1.fit(X_model1, Y_model1_categorical, batch_size=batch_size, epochs=epochs)
@@ -218,9 +220,9 @@ for Loop in range(Loop_final):
   top_accuracy = np.argmax(accuracy_rank)
   print("Top_accuracy_model:", top_accuracy)
 
-# 信頼度によるデータの抽出
-  X_add = np.zeros([10, 2])
-  Y_add = np.zeros([10, 1])
+  # 信頼度によるデータの追加・削除
+  X_add = np.zeros([20, 2])
+  Y_add = np.zeros([20, 1])
   delete_data = []
   add_num = X_add.shape[0]
 
@@ -229,127 +231,127 @@ for Loop in range(Loop_final):
       max_data = 0
       max_data_index = 0
 
-      for t in range(Y_model1_reliability.shape[0]):
-        if max_data < np.amax(Y_model1_reliability[t]):
-          max_data = np.amax(Y_model1_reliability[t], axis=0)
+      for t in range(Y_model1_predict.shape[0]):
+        if max_data < np.amax(Y_model1_predict[t]):
+          max_data = np.amax(Y_model1_predict[t], axis=0)
           max_data_index = t
 
       X_add[i] = X_model1[max_data_index]
       Y_add[i] = Y_model1[max_data_index]
-      delete_data.append(max_data_index)
+      delete_data.append(shuffle_num1[max_data_index])
 
+      Y_model1_predict = np.delete(Y_model1_predict, max_data_index, axis=0)
       Y_model1 = np.delete(Y_model1, max_data_index, axis=0)
-      Y_model1_reliability = np.delete(Y_model1_reliability, max_data_index, axis=0)
-      shuffle_num1 = np.delete(shuffle_num1, max_data_index, axis=0)
+      X_model1 = np.delete(X_model1, max_data_index, axis=0)
+      shuffle_num1 = np.delete(shuffle_num1, max_data_index)
 
     X_train = np.concatenate((X_train, X_add), axis=0)
     Y_train = np.append(Y_train, Y_add)
-    X_unlabel = np.delete(X_unlabel, delete_data[0:add_num], axis=0)
 
   elif top_accuracy == 2:
     for i in range(X_add.shape[0]):
       max_data = 0
       max_data_index = 0
 
-      for t in range(Y_model2_reliability.shape[0]):
-        if max_data < np.amax(Y_model2_reliability[t]):
-          max_data = np.amax(Y_model2_reliability[t], axis=0)
+      for t in range(Y_model2_predict.shape[0]):
+        if max_data < np.amax(Y_model2_predict[t]):
+          max_data = np.amax(Y_model2_predict[t], axis=0)
           max_data_index = t
 
       X_add[i] = X_model2[max_data_index]
       Y_add[i] = Y_model2[max_data_index]
-      delete_data.append(max_data_index)
+      delete_data.append(shuffle_num2[max_data_index])
 
+      Y_model2_predict = np.delete(Y_model2_predict, max_data_index, axis=0)
       Y_model2 = np.delete(Y_model2, max_data_index, axis=0)
-      Y_model2_reliability = np.delete(Y_model2_reliability, max_data_index, axis=0)
-      shuffle_num2 = np.delete(shuffle_num2, max_data_index, axis=0)
+      X_model2 = np.delete(X_model2, max_data_index, axis=0)
+      shuffle_num2 = np.delete(shuffle_num2, max_data_index)
 
     X_train = np.concatenate((X_train, X_add), axis=0)
     Y_train = np.append(Y_train, Y_add)
-    X_unlabel = np.delete(X_unlabel, delete_data[0:add_num], axis=0)
 
   elif top_accuracy == 3:
     for i in range(X_add.shape[0]):
       max_data = 0
       max_data_index = 0
 
-      for t in range(Y_model3_reliability.shape[0]):
-        if max_data < np.amax(Y_model3_reliability[t]):
-          max_data = np.amax(Y_model3_reliability[t], axis=0)
+      for t in range(Y_model3_predict.shape[0]):
+        if max_data < np.amax(Y_model3_predict[t]):
+          max_data = np.amax(Y_model3_predict[t], axis=0)
           max_data_index = t
 
       X_add[i] = X_model3[max_data_index]
       Y_add[i] = Y_model3[max_data_index]
-      delete_data.append(max_data_index)
+      delete_data.append(shuffle_num3[max_data_index])
 
+      Y_model3_predict = np.delete(Y_model3_predict, max_data_index, axis=0)
       Y_model3 = np.delete(Y_model3, max_data_index, axis=0)
-      Y_model3_reliability = np.delete(Y_model3_reliability, max_data_index, axis=0)
-      shuffle_num3 = np.delete(shuffle_num3, max_data_index, axis=0)
+      X_model3 = np.delete(X_model3, max_data_index, axis=0)
+      shuffle_num3 = np.delete(shuffle_num3, max_data_index)
 
     X_train = np.concatenate((X_train, X_add), axis=0)
     Y_train = np.append(Y_train, Y_add)
-    X_unlabel = np.delete(X_unlabel, delete_data[0:add_num], axis=0)
 
   elif top_accuracy == 4:
     for i in range(X_add.shape[0]):
       max_data = 0
       max_data_index = 0
 
-      for t in range(Y_model4_reliability.shape[0]):
-        if max_data < np.amax(Y_model4_reliability[t]):
-          max_data = np.amax(Y_model4_reliability[t], axis=0)
+      for t in range(Y_model4_predict.shape[0]):
+        if max_data < np.amax(Y_model4_predict[t]):
+          max_data = np.amax(Y_model4_predict[t], axis=0)
           max_data_index = t
 
       X_add[i] = X_model4[max_data_index]
       Y_add[i] = Y_model4[max_data_index]
-      delete_data.append(max_data_index)
+      delete_data.append(shuffle_num4[max_data_index])
 
+      Y_model4_predict = np.delete(Y_model4_predict, max_data_index, axis=0)
       Y_model4 = np.delete(Y_model4, max_data_index, axis=0)
-      Y_model4_reliability = np.delete(Y_model4_reliability, max_data_index, axis=0)
-      shuffle_num4 = np.delete(shuffle_num4, max_data_index, axis=0)
+      X_model4 = np.delete(X_model4, max_data_index, axis=0)
+      shuffle_num4 = np.delete(shuffle_num4, max_data_index)
 
     X_train = np.concatenate((X_train, X_add), axis=0)
     Y_train = np.append(Y_train, Y_add)
-    X_unlabel = np.delete(X_unlabel, delete_data[0:add_num], axis=0)
 
   elif top_accuracy == 5:
     for i in range(X_add.shape[0]):
       max_data = 0
       max_data_index = 0
 
-      for t in range(Y_model5_reliability.shape[0]):
-        if max_data < np.amax(Y_model5_reliability[t]):
-          max_data = np.amax(Y_model5_reliability[t], axis=0)
+      for t in range(Y_model5_predict.shape[0]):
+        if max_data < np.amax(Y_model5_predict[t]):
+          max_data = np.amax(Y_model5_predict[t], axis=0)
           max_data_index = t
 
       X_add[i] = X_model5[max_data_index]
       Y_add[i] = Y_model5[max_data_index]
-      delete_data.append(max_data_index)
+      delete_data.append(shuffle_num5[max_data_index])
 
+      Y_model5_predict = np.delete(Y_model5_predict, max_data_index, axis=0)
       Y_model5 = np.delete(Y_model5, max_data_index, axis=0)
-      Y_model5_reliability = np.delete(Y_model5_reliability, max_data_index, axis=0)
-      shuffle_num5 = np.delete(shuffle_num5, max_data_index, axis=0)
+      X_model5 = np.delete(X_model5, max_data_index, axis=0)
+      shuffle_num5 = np.delete(shuffle_num5, max_data_index)
 
     X_train = np.concatenate((X_train, X_add), axis=0)
     Y_train = np.append(Y_train, Y_add)
-    X_unlabel = np.delete(X_unlabel, delete_data[0:add_num], axis=0)
 
   # データ追加後の学習
-  Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
+  Y_train_categorical = keras.utils.to_categorical(Y_train, 2)
   print(Y_train_categorical)
 
   main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
 
-  # 評価
-  Y_test_categorical = keras.utils.to_categorical(Y_test-1, 2)
+  Y_test_categorical = keras.utils.to_categorical(Y_test, 2)
   classifier = main_model.evaluate(X_test, Y_test_categorical, verbose=0)
+
   if Loop_count < Loop_final:
     # ループ毎のmain_modelの評価
     print("%dループ目の精度"%Loop_count)
     print('main_model_Cross entropy:{0:.3f}, main_model_Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
   elif Loop_count == Loop_final:
-    # 最終のmain_modelの評価
+    #最終のmain_modelの評価
     print("最終精度")
     print('main_model_Cross entropy:{0:.3f}, main_model_Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
@@ -370,8 +372,10 @@ ax.set_ylim(-2, 2)
 plt.title("X_train Data")
 plt.show()
 
+# 学習時間
 calculation_time = time.time() - startTime
 print("Calculation time:{0:.3f}sec".format(calculation_time))
 
+# 要素数の確認
 print("X_unlabelの要素数:", X_unlabel.shape[0])
 print("X_trainの要素数:", X_train.shape[0])

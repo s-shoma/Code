@@ -1,4 +1,5 @@
 # ---------- 提案手法 ---------- #
+
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -24,7 +25,7 @@ main_model.add(Dense(2, activation='softmax'))
 main_model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
 Loop_count = 1
-Loop_final = 15
+Loop_final = 10
 startTime = time.time()
 
 # ループ
@@ -32,12 +33,12 @@ for Loop in range(Loop_final):
   print("ループ回数: ", Loop_count)
 
   if Loop_count == 1:
-    Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
+    Y_train_categorical = keras.utils.to_categorical(Y_train, 2)
     #print(Y_train_categorical)
 
     # 学習
     main_epochs = 300
-    main_batch_size = 256
+    main_batch_size = 128
     main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
 
   # 予測
@@ -73,7 +74,7 @@ for Loop in range(Loop_final):
   #plt.show()
 
   # 野生データ(予測したデータ)の学習
-  num = 100
+  num = 200
 
   X_model1 = np.zeros([num, 2])
   Y_model1 = np.zeros([num, 1])
@@ -166,14 +167,14 @@ for Loop in range(Loop_final):
   model5.add(Dense(2, activation='softmax'))
   model5.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
-  Y_model1_categorical = keras.utils.to_categorical(Y_model1-1, 2)
-  Y_model2_categorical = keras.utils.to_categorical(Y_model2-1, 2)
-  Y_model3_categorical = keras.utils.to_categorical(Y_model3-1, 2)
-  Y_model4_categorical = keras.utils.to_categorical(Y_model4-1, 2)
-  Y_model5_categorical = keras.utils.to_categorical(Y_model5-1, 2)
+  Y_model1_categorical = keras.utils.to_categorical(Y_model1, 2)
+  Y_model2_categorical = keras.utils.to_categorical(Y_model2, 2)
+  Y_model3_categorical = keras.utils.to_categorical(Y_model3, 2)
+  Y_model4_categorical = keras.utils.to_categorical(Y_model4, 2)
+  Y_model5_categorical = keras.utils.to_categorical(Y_model5, 2)
 
   # 学習
-  epochs = 200
+  epochs = 150
   batch_size = 64
 
   model1.fit(X_model1, Y_model1_categorical, batch_size=batch_size, epochs=epochs)
@@ -251,12 +252,12 @@ for Loop in range(Loop_final):
     Y_predict_label = np.delete(Y_predict_label, shuffle_num5[0:num], axis=0)
 
   # データ追加後の学習
-  Y_train_categorical = keras.utils.to_categorical(Y_train-1, 2)
+  Y_train_categorical = keras.utils.to_categorical(Y_train, 2)
   print(Y_train_categorical)
 
   main_model.fit(X_train, Y_train_categorical, batch_size=main_batch_size, epochs=main_epochs)
 
-  Y_test_categorical = keras.utils.to_categorical(Y_test-1, 2)
+  Y_test_categorical = keras.utils.to_categorical(Y_test, 2)
   classifier = main_model.evaluate(X_test, Y_test_categorical, verbose=0)
 
   if Loop_count < Loop_final:
@@ -265,13 +266,27 @@ for Loop in range(Loop_final):
     print('main_model_Cross entropy:{0:.3f}, main_model_Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
   elif Loop_count == Loop_final:
+    #最終のmain_modelの評価
     print("最終精度")
     print('main_model_Cross entropy:{0:.3f}, main_model_Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
 
+  # 追加されたデータの描画
+  fig = plt.figure(figsize=(6, 6))
+  ax = fig.add_subplot(1, 1, 1)
+  for i in range(X_train.shape[0]):
+    if Y_train[i] == 0:
+      ax.scatter(X_train[i, 0], X_train[i, 1], c='red', s=4)
+    elif Y_train[i] == 1:
+      ax.scatter(X_train[i, 0], X_train[i, 1], c='blue', s=4)
+
+  margin = 1.1
+  ax.set_xlim(-2, 2)
+  ax.set_ylim(-2, 2)
+  plt.title("X_train Data")
+  plt.show()
+
   Loop_count += 1
 
-  print("X_unlabelの要素数:", X_unlabel.shape[0])
-  print("X_trainの要素数:", X_train.shape[0])
 # 追加されたデータの描画
 fig = plt.figure(figsize=(6, 6))
 ax = fig.add_subplot(1, 1, 1)

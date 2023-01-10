@@ -51,13 +51,14 @@ margin = 1.1
 ax.set_xlim(-2, 2)
 ax.set_ylim(-2, 2)
 plt.title("Total Data")
+plt.savefig('Total train Data')
 plt.show()
 
 # ----- ラベルなしデータの作成 ----- #
 Num = np.arange(X.shape[0])
 #print(Num.shape[0])
 
-rand = np.random.choice(Num, size=300, replace=False)
+rand = np.random.choice(Num, size=400, replace=False)   # 重複なし
 #print("rand:", rand)
 
 X_train = np.zeros([rand.shape[0], 2])
@@ -86,6 +87,7 @@ margin = 1.1
 ax.set_xlim(-2, 2)
 ax.set_ylim(-2, 2)
 plt.title("Train Data")
+plt.savefig('Train Data')
 plt.show()
 
 # ラベルなしデータの描画

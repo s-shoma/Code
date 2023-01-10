@@ -24,7 +24,7 @@ model.add(Dense(4, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
 Loop_count = 1
-Loop_final = 10
+Loop_final = 1
 startTime = time.time()
 
 # ループ
@@ -32,11 +32,11 @@ for Loop in range(Loop_final):
   print("ループ回数:", Loop_count)
 
   if Loop_count == 1:
-    Y_train_categorical = keras.utils.to_categorical(Y_train-1, 4)
-    #print(Y_train_categorical)
+    Y_train_categorical = keras.utils.to_categorical(Y_train, 3)
+    print(Y_train_categorical)
 
-    epochs = 200
-    batch_size = 128
+    epochs = 300
+    batch_size = 256
     model.fit(X_train, Y_train_categorical, batch_size=batch_size, epochs=epochs) #学習
 
   # 仮ラベルの予測
@@ -105,7 +105,7 @@ for Loop in range(Loop_final):
 
   elif Loop_count == Loop_final:
     # 最終評価
-    Y_test_categorical = keras.utils.to_categorical(Y_test-1, 4)
+    Y_test_categorical = keras.utils.to_categorical(Y_test, 3)
     classifier = model.evaluate(X_test, Y_test_categorical, verbose=0)
     print("最終精度")
     print('Cross entropy:{0:.3f}, Accuracy:{1:.3f}'.format(classifier[0], classifier[1]))
@@ -116,5 +116,5 @@ for Loop in range(Loop_final):
 calculation_time = time.time() - startTime
 print("Calculation time:{0:.3f}sec".format(calculation_time))
 
-print("X_unlabelの要素数:", X_unlabel.shape[0])
-print("X_trainの要素数:", X_train.shape[0])
+#print("X_unlabelの要素数:", X_unlabel.shape[0])
+#print("X_trainの要素数:", X_train.shape[0])

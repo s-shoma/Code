@@ -15,28 +15,28 @@ X_test = np.loadtxt("X_test.csv", delimiter=",", dtype="float")  # テストデ�
 Y_test = np.loadtxt("Y_test.csv", delimiter=",", dtype="float")  # テストデータ
 
 # モデルの構築
-Y__train_categorical = keras.utils.to_categorical(Y_train-1, 2)
+Y__train_categorical = keras.utils.to_categorical(Y_train, 2)
 print(Y__train_categorical)
 
-model = Sequential()
-model.add(InputLayer(input_shape=(2,)))
-model.add(Dense(500, activation='relu'))
-model.add(Dense(250, activation='relu'))
-model.add(Dense(100, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(2, activation='sigmoid'))
-model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+main_model = Sequential()
+main_model.add(InputLayer(input_shape=(2,)))
+main_model.add(Dense(500, activation='relu'))
+main_model.add(Dense(250, activation='relu'))
+main_model.add(Dense(100, activation='relu'))
+main_model.add(Dense(50, activation='relu'))
+main_model.add(Dense(2, activation='sigmoid'))
+main_model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 
 startTime = time.time()
 
 # 学習
-epochs = 200
-batch_size = 256
-model.fit(X_train, Y__train_categorical, batch_size=batch_size, epochs=epochs)
+main_epochs = 300
+main_batch_size = 128
+main_model.fit(X_train, Y__train_categorical, batch_size=main_batch_size, epochs=main_epochs)
 
 # モデルの評価
-Y_test_categorical = keras.utils.to_categorical(Y_test-1, 2)
-classifier = model.evaluate(X_test, Y_test_categorical, verbose=0)
+Y_test_categorical = keras.utils.to_categorical(Y_test, 2)
+classifier = main_model.evaluate(X_test, Y_test_categorical, verbose=0)
 print('cross entropy{0:.3f}, accuracy{1:.3f}'.format(classifier[0], classifier[1]))
 
 calculation_time = time.time() - startTime
